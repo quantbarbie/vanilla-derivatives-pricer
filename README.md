@@ -66,7 +66,3 @@ argument and returned a hardcoded multiple of notional.
   curve-implied forward rate via Black-76; the American rate option uses the
   same value as a lower-bound approximation (no rate lattice).
 - Swap float leg is valued at par: `N * (DF(start) - DF(end))`.
-
-These are standard textbook simplifications — swap them out for proper
-forward-rate projection, a dividend term, or a true Hull-White/rate lattice if
-you need production-grade rate-option numbers.
