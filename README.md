@@ -28,35 +28,7 @@ Portfolio-> aggregates PV/DV01/Vega/PnL and reports a hedge vs. risk limits
 TradeFactory parses a row into the right Trade; MathUtils has the closed forms.
 ```
 
-The single design change that makes the project *functional* rather than a
-stub: pricing takes a `const Market&`. Previously every `computePV` ignored its
-argument and returned a hardcoded multiple of notional.
-
-## What was fixed
-
-- **Pricing actually uses market data.** Bonds discount their cashflows off the
-  curve; swaps value fixed-vs-float legs; options use spot/vol/rate. The old
-  `notional * 0.95`-style placeholders are gone.
-- **Risk is real.** DV01 = PV change for a -1bp parallel curve shift; Vega = PV
-  change for a +1 vol-point shift; PnL = PV(day2) - PV(day1). All by
-  bump-and-reprice, centralised in `Trade`.
-- **Date arithmetic.** `operator-` now uses an exact serial-day count
-  (days-from-civil) for ACT/365 year fractions instead of the broken
-  `month/12 + day/365` mix. Added `Date::fromString`, `serial()`, real
-  `dateAddTenor`, and `tenorToYears`.
-- **Curve interpolation & discounting.** `RateCurve`/`VolCurve` now interpolate
-  linearly in time (sorted pillars, flat extrapolation). `getDf` uses the
-  maturity-matched rate, not just `ON`.
-- **Underlying mapping.** CSV underlyings (`usd-gov`, `usd-sofr`, `appl`,
-  `sp500`, `sti`) are mapped to market keys (`USD`, `AAPL`, `SP500`, `STI`), so
-  trades find their market data.
-- **`maximizePnl`'s `* 2` nonsense removed.** Replaced with `Portfolio::reportHedge`,
-  which reports the offsetting DV01/Vega needed to flatten the book.
-- **Cleanups.** No-op `calculatePnL`/`computePnL` placeholders removed,
-  `time_t`-based dates replaced by the `Date` class, modern overrides, `explicit`
-  ctors, and a warning-clean build under `-Wall -Wextra`.
-
-## Modeling assumptions (kept deliberately simple)
+## Modeling assumptions
 
 - Single-currency (USD) book; all trades discount off the USD curve.
 - Zero rates are continuously compounded; discount factor `df = exp(-r*t)`.
